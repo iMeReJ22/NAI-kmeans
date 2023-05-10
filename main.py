@@ -39,7 +39,7 @@ def get_k_random_datapoints(vectors, k):
             tmp_vector.append(random.uniform(min_v, max_v))
         random_data.append(DataPoint(tmp_vector, i))
 
-    return random_data
+    return random_data, min_v, max_v
 
 
 def get_distance_of_2_vectors(vector1, vector2):
@@ -68,18 +68,22 @@ def assign_vectors_to_data_points(vectors, data_points):
     return vectors
 
 
-def reassign_datapoints(vectors, data_points):
+def reassign_datapoints(vectors, data_points, min_v, max_v):
     for data_point in data_points:
         tmp_vectors = list()
         for vector in vectors:
             if vector.cluster == data_point.name:
                 tmp_vectors.append(vector.vector)
-        data_point.vector = get_mean(tmp_vectors, data_point.vector)
+        data_point.vector = get_mean(tmp_vectors, min_v, max_v)
 
 
-def get_mean(vectors, old):
+def get_mean(vectors, min_v, max_v):
     if len(vectors) == 0:
-        return old
+        tmp_vector = list()
+        for j in range(len(vectors)):
+            tmp_vector.append(random.uniform(min_v, max_v))
+        return tmp_vector
+
     n = len(vectors[0])
 
     sum_vector = list()
@@ -96,9 +100,15 @@ def get_mean(vectors, old):
     return sum_vector
 
 
-def print_data(vectors):
-    for vector in vectors:
-        print(f"vector: {vector.vector}\tcurrent cluster: {vector.cluster}\tcurrent distance: {vector.distance}")
+def print_data(vectors, data_points):
+    for data_point in data_points:
+        print(f"\n~~~~~~~~~~~~~~~~~~~~~~\nData for centroid: {data_point.name}")
+        sum_v = 0
+        for vector in vectors:
+            if vector.cluster == data_point.name:
+                sum_v += vector.distance * vector.distance
+                print(f"{vector.vector} centroid: {vector.cluster} distance: {vector.distance}")
+        print(f"Sum of squared distances: {sum_v}")
 
 
 def print_datapoints(data_points):
@@ -124,7 +134,7 @@ def copy_clusters(vectors):
 def main():
     vectors = get_vectors("data/iris.txt")
     k = get_k_from_user()
-    data_points = get_k_random_datapoints(vectors, k)
+    data_points, min_v, max_v = get_k_random_datapoints(vectors, k)
     current = 1
     while True:
         print(f"\n\nCurrent {current}")
@@ -132,10 +142,10 @@ def main():
         last_vector_clusters = copy_clusters(vectors)
         vectors = assign_vectors_to_data_points(vectors, data_points)
         print_datapoints(data_points)
-        print_data(vectors)
+        print_data(vectors, data_points)
         if are_they_the_same(vectors, last_vector_clusters):
             break
-        reassign_datapoints(vectors, data_points)
+        reassign_datapoints(vectors, data_points, min_v, max_v)
 
 
 main()
