@@ -54,6 +54,8 @@ def get_distance_of_2_vectors(vector1, vector2):
 
 
 def assign_vectors_to_data_points(vectors, data_points):
+    # print_data(vectors)
+    # print("\n\n\n")
     for vector in vectors:
         vector.reset()
         for data_point in data_points:
@@ -62,6 +64,7 @@ def assign_vectors_to_data_points(vectors, data_points):
                 vector.distance = distance
                 vector.cluster = data_point.name
 
+    # print_data(vectors)
     return vectors
 
 
@@ -105,34 +108,33 @@ def print_datapoints(data_points):
 
 def are_they_the_same(vectors, last_vectors):
     for i in range(len(vectors)):
-        if vectors[i].cluster != last_vectors[i].cluster:
-            print("they are not the same")
+        if vectors[i].cluster != last_vectors[i]:
             return False
     return True
+
+
+def copy_clusters(vectors):
+    clusters = list()
+    for vector in vectors:
+        clusters.append(vector.cluster)
+
+    return clusters
 
 
 def main():
     vectors = get_vectors("data/iris.txt")
     k = get_k_from_user()
     data_points = get_k_random_datapoints(vectors, k)
-    first = True
-    last_vectors = vectors
     current = 1
     while True:
         print(f"\n\nCurrent {current}")
         current += 1
+        last_vector_clusters = copy_clusters(vectors)
         vectors = assign_vectors_to_data_points(vectors, data_points)
         print_datapoints(data_points)
         print_data(vectors)
-        if first:
-            last_vectors = vectors
-            first = False
-        else:
-            if are_they_the_same(vectors, last_vectors):
-                # print("last\n***************")
-                # print_data(last_vectors)
-                break
-            last_vectors = vectors
+        if are_they_the_same(vectors, last_vector_clusters):
+            break
         reassign_datapoints(vectors, data_points)
 
 
